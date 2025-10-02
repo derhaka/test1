@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BM → Sarawak Converter + Audio</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #fafafa; }
+    textarea, pre {
+      width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px;
+      border: 1px solid #ccc; font-size: 16px;
+    }
+    button {
+      padding: 12px 20px; margin: 5px 0;
+      font-size: 16px; border: none; border-radius: 8px;
+      background: #4caf50; color: white; cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    .audio-btn { background: #2196f3; }
+    .audio-btn:hover { background: #1976d2; }
+  </style>
+</head>
+<body>
+  <h2>BM → Sarawak Converter</h2>
+  <textarea id="inputText" rows="4" placeholder="Tulis ayat dalam BM..."></textarea>
+  <button onclick="convertText()">Convert</button>
+  <button class="audio-btn" onclick="playAudio()">🔊 Baca</button>
+  <h3>Output (Sarawak):</h3>
+  <pre id="outputText"></pre>
+
+<script>
+  function malayToSarawak(text) {
+    const replacements = {
+      "saya":"kamek","aku":"kamek","awak":"kitak","engkau":"kitak","kamu":"kitak",
+      "kami":"kamek","kita":"kamek orang","dia":"iya","mereka":"sidak","kalian":"sidak",
+      "pergi":"pi","sudah":"udah","belum":"kelak","jangan":"sik","tidak":"sik","tak":"sik",
+      "apa":"apa gik","bagaimana":"camne","mengapa":"kenak","kenapa":"kenak","kerana":"pasal",
+      "dengan":"ngan","begitu":"gitok","begini":"gine","sangat":"benar","sekali":"sik abis",
+      "sedikit":"sikit","banyak":"gaga","orang":"urang","rumah":"umah","besar":"besa","kecil":"kecik",
+      "cantik":"manis","kawan":"kaban","teman":"kaban","budak":"anak kecik","lelaki":"polah laki",
+      "perempuan":"bini","ayah":"bapak","bapa":"bapak","ibu":"mak","emak":"mak",
+      "abang":"abang","kakak":"kakak","adik":"adik","sekejap":"kejap gik","sebentar":"kejap gik",
+      "tunggu":"nunggah","makan":"makey","minum":"minum","jalan":"jaley","kerja":"kija",
+      "tidur":"tidok","bangun":"bangkit","buat":"polah","lihat":"tengok","beri":"gikik","bagi":"gikik",
+      "betul":"bok","malu":"segan","bodoh":"paloi","pandai":"cerdik","marah":"gagar","penat":"letih gik",
+      "lapar":"lapak","kenyang":"full gik","cantik benar":"manis gilak","baik":"manah","buruk":"rugut",
+      "jahat":"jaha","bodoh sik abis":"paloi gilak"
+    };
+
+    return text.split(/\b/).map(token => {
+      if (/^[\s.,!?;:()]+$/.test(token)) return token;
+      const lower = token.toLowerCase();
+      let newWord = replacements[lower] || lower;
+      if (!replacements[lower]) {
+        if (newWord.endsWith("an")) newWord = newWord.replace(/an$/, "ey");
+        newWord = newWord.replace(/ak$/, "ok").replace(/at$/, "ok");
+      }
+      if (token === token.toUpperCase()) newWord = newWord.toUpperCase();
+      else if (token[0] === token[0].toUpperCase()) newWord = newWord.charAt(0).toUpperCase()+newWord.slice(1);
+      return newWord;
+    }).join("");
+  }
+
+  function convertText() {
+    const input = document.getElementById("inputText").value;
+    const output = malayToSarawak(input);
+    document.getElementById("outputText").innerText = output;
+  }
+
+  function playAudio() {
+    const text = document.getElementById("outputText").innerText;
+    if (!text) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ms-MY"; // Malay voice (closest to Sarawak)
+    utter.rate = 0.95; // slow down a bit for clarity
+    window.speechSynthesis.speak(utter);
+  }
+</script>
+</body>
+</html>
